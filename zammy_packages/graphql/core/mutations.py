@@ -121,9 +121,12 @@ class AuthenticatedMutation(graphene.Mutation):
     @classmethod
     def mutate(cls, result, *info, **kwargs):
         user_info = cls.authenticate(info[0])
-        user = ZammyAccount.objects.get(
-            email=user_info["email"], login_type=user_info["login_type"]
-        )
+        try:
+            user = ZammyAccount.objects.get(
+                email=user_info["email"], login_type=user_info["login_type"]
+            )
+        except ZammyAccount.DoesNotExist:
+            raise Exception("User does not exist")
         return cls.perform_mutation(cls, user, *info, **kwargs)
 
     @classmethod
